@@ -3,7 +3,7 @@
 
 # BioVoxxel_Toolbox
 
-The BioVoxxel Toolbox is a suite which contains plugins and some macros dealing with image filtering, image segmentation and binary image processing and analysis. The following plugins are hosted here, so are:
+The BioVoxxel Toolbox is a suite which contains plugins and some macros dealing with image filtering, image segmentation and binary image processing and analysis. The following plugins are hosted here:
 
 * Extended Particle Analyzer
 * Binary Feature Extractor
@@ -15,14 +15,15 @@ The BioVoxxel Toolbox is a suite which contains plugins and some macros dealing 
 * Convoluted Background Subtraction
 * 2D Particle Distribution (Distribution_Analysis)
 * Cluster Indicator
+* SSIDC Cluster Indicator 
 * Gaussian weighted Median filter
 * Adaptive Filter
 * Enhance True Color Contrast
 * Mode and Differential Limited Mean Binarization
-
-# Under development
-
 * Basic Recursive Filter
+
+# BioVoxxel Tool Menu
+The [BioVoxxel Toolbox menu](https://github.com/biovoxxel/BioVoxxel-Toolbox/blob/master/Biovoxxel_Plugins/src/main/java/toolbox.menu/BioVoxxel_Toolbox.ijm) for Fiji is in a seperate menu and can be installed together with the plugins via the [BioVoxxel update site](https://imagej.net/Following_an_update_site). 
 
 # License
 The BioVoxxel Toolbox project runs under the [BSD-3 License](./LICENSE)
