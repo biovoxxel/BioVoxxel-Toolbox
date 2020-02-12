@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.biovoxxel</groupId>
 	<artifactId>Biovoxxel_Plugins</artifactId>
-	<version>2.3.1</version>
+	<version>2.4.1</version>
 	<name>BioVoxxel_Toolbox</name>
 	<url>https://github.com/biovoxxel/BioVoxxel_Toolbox</url>
 	<description>The BioVoxxel toolbox contains different plugins for image filtering, tools for improved image binarization as well as tools for binary image analysis</description>
@@ -104,7 +104,7 @@
 	      <groupId>org.apache.maven.plugins</groupId>
 	      <artifactId>maven-jar-plugin</artifactId>
 	      <configuration>
-	        <outputDirectory>/my/path</outputDirectory>
+	        <outputDirectory>C:\BioVoxxel (SSD)\Fiji\Fiji-191031\Fiji.app\plugins</outputDirectory>
 	      </configuration>
 	    </plugin>
 	  </plugins>
