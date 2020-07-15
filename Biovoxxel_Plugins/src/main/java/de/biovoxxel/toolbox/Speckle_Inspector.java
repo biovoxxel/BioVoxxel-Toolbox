@@ -6,8 +6,10 @@ import java.awt.Font;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Macro;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
@@ -84,6 +86,8 @@ public class Speckle_Inspector implements PlugInFilter {
 	private int flags = DOES_ALL;
 	private int nPasses, pass;
 	
+	private boolean oldMacro = false;
+	
 	//Define variables
 	private int positive=0;
 	//private int negative=0;
@@ -93,29 +97,32 @@ public class Speckle_Inspector implements PlugInFilter {
 	private int NegLess=0;
 	private int NegMore=0;
 	//define input variables
-	private String bigObjects;
-	private String smallObjects;
+	private String primaryObjects;
+	private String secondaryObjects;
 	private String redirectToImage;
-	private double minObjectSize;
-	private double maxObjectSize;
-	private double minObjectCirc;
-	private double maxObjectCirc;
-	private double minSpeckleNumber;
-	private double maxSpeckleNumber;
-	private double minSpeckleSize;
-	private double maxSpeckleSize;
+	private double minPrimarySize;
+	private double maxPrimarySize;
+	private double minPrimaryCirc;
+	private double maxPrimaryCirc;
+	private double minSecondaryNumber;
+	private double maxSecondaryNumber;
+	private double minSecondarySize;
+	private double maxSecondarySize;
+	private double minSecondaryCircularity;
+	private double maxSecondaryCircularity;
 	private boolean excludeEdge;
-	private boolean showRoiManager;
+	private String showRoiManager;
 	private boolean showSpeckleList;
 	private boolean showStatisticsLog;
-	private boolean individualRoiAnalysis;
+	private boolean secondaryObjectAnalysis;
 	private double fontSize;
 	
 	//Particle Analyzer flag definitions
 	private int measurementFlags = Measurements.AREA|Measurements.MEAN|Measurements.STD_DEV|Measurements.MODE|Measurements.MIN_MAX|Measurements.CENTROID|Measurements.CENTER_OF_MASS|Measurements.PERIMETER|Measurements.RECT|Measurements.ELLIPSE|Measurements.SHAPE_DESCRIPTORS|Measurements.FERET|Measurements.INTEGRATED_DENSITY|Measurements.MEDIAN|Measurements.SKEWNESS|Measurements.KURTOSIS|Measurements.AREA_FRACTION|Measurements.STACK_POSITION|Measurements.LIMIT|Measurements.LABELS;
-	private int analyzerOptions = ParticleAnalyzer.CLEAR_WORKSHEET|ParticleAnalyzer.RECORD_STARTS;
-	private int speckleAnalyzerOptions = ParticleAnalyzer.CLEAR_WORKSHEET|ParticleAnalyzer.RECORD_STARTS;
-	private RoiManager rm;
+	private int primaryAnalyzerOptions = ParticleAnalyzer.CLEAR_WORKSHEET|ParticleAnalyzer.RECORD_STARTS;
+	private int secondaryAnalyzerOptions = ParticleAnalyzer.CLEAR_WORKSHEET|ParticleAnalyzer.RECORD_STARTS;
+	private RoiManager primaryRoiManager;
+	private RoiManager secondaryRoiManager;
 	
 	public int setup(String arg, ImagePlus imp) {
 		this.imp = imp;
@@ -125,26 +132,52 @@ public class Speckle_Inspector implements PlugInFilter {
 	public void run(ImageProcessor ip) {
 
 		String[] imageNames = getOpenImageNames();
-				
+		String[] roiManagerList = {"none", "primary", "secondary"};
+		
+		//legacy macro compatibility regarding object naming
+		String macroParameters = Macro.getOptions();
+		if (macroParameters != null && macroParameters.indexOf("big=") >= 0 && macroParameters.indexOf("small=") >= 0) {
+			oldMacro = true;
+			String modernMacroParameters = macroParameters.replace("big=", "primary=");
+			modernMacroParameters = modernMacroParameters.replace("small=", "secondary=");
+			modernMacroParameters = modernMacroParameters.replace("min_object=", "min_primary_size=");
+			modernMacroParameters = modernMacroParameters.replace("max_object=", "max_primary_size=");
+			modernMacroParameters = modernMacroParameters.replace("min_object_circularity=", "min_primary_circularity=");
+			modernMacroParameters = modernMacroParameters.replace("max_object_circularity=", "max_primary_circularity=");
+			modernMacroParameters = modernMacroParameters.replace("min_speckle_number=", "lower_secondary_count=");
+			modernMacroParameters = modernMacroParameters.replace("max_speckle_number=", "upper_secondary_count=");
+			modernMacroParameters = modernMacroParameters.replace("min_speckle_size=", "min_secondary_size=");
+			modernMacroParameters = modernMacroParameters.replace("max_speckle_size=", "max_secondary_size=");
+			modernMacroParameters = modernMacroParameters.replace(" roi ", " show=primary ");
+			modernMacroParameters = modernMacroParameters.replace("individual_roi", "secondary_object");
+			
+			Macro.setOptions(modernMacroParameters);			
+		}
+		
 		GenericDialog gd = new GenericDialog("Speckle Inspector");
-			gd.addChoice("big objects", imageNames, imageNames[0]);
-			gd.addChoice("small speckles", imageNames, imageNames[0]);
-			gd.addChoice("redirect measurements to", imageNames, imageNames[0]);
-			gd.addNumericField("min_Object size: ", 0, 0, 9, "pixel");
-			gd.addNumericField("max_Object size: ", Double.POSITIVE_INFINITY, 0, 9, "pixel");
-			gd.addNumericField("min_Object_circularity: ", 0.00, 2, 9, "");
-			gd.addNumericField("max_Object_circularity: ", 1.00, 2, 9, "");
+			gd.addChoice("Primary objects (binary)", imageNames, imageNames[0]);
+			gd.addChoice("Secondary objects (binary)", imageNames, imageNames[0]);
+			gd.addChoice("Redirect measurements to", imageNames, imageNames[0]);
 			
-			gd.addNumericField("min_Speckle_number: ", 0, 0, 9, "");
-			gd.addNumericField("max_Speckle_number: ", Double.POSITIVE_INFINITY, 0, 9, "");
-			gd.addNumericField("min_Speckle_size: ", 0, 0, 9, "pixel");
-			gd.addNumericField("max_Speckle_size: ", Double.POSITIVE_INFINITY, 0, 9, "pixel");
+			gd.addNumericField("min_primary_size: ", 0, 0, 9, "pixel");
+			gd.addNumericField("max_primary_size: ", Double.POSITIVE_INFINITY, 0, 9, "pixel");
+			gd.addNumericField("min_primary_circularity: ", 0.00, 2, 9, "");
+			gd.addNumericField("max_primary_circularity: ", 1.00, 2, 9, "");
 			
+			gd.addNumericField("lower_secondary_count: ", 0, 0, 9, "");
+			gd.addNumericField("upper_secondary_count: ", Double.POSITIVE_INFINITY, 0, 9, "");
+			
+			gd.addNumericField("min_secondary_size: ", 0, 0, 9, "pixel");
+			gd.addNumericField("max_secondary_size: ", Double.POSITIVE_INFINITY, 0, 9, "pixel");
+			gd.addNumericField("min_secondary_circularity", 0.00, 2, 9, "");
+			gd.addNumericField("max_secondary_circularity", 1.00, 2, 9, "");
+			
+			gd.addChoice("show ROI Manager", roiManagerList, roiManagerList[0]);
 			gd.addCheckbox("exclude objects on edges", true);
-			gd.addCheckbox("roi manager visible", false);
+			//gd.addCheckbox("roi manager visible", false);
 			gd.addCheckbox("speckle list", false);
 			gd.addCheckbox("statistic log", false);
-			gd.addCheckbox("individual_roi analysis", false);
+			gd.addCheckbox("secondary_object analysis", false);
 
 			gd.addNumericField("font size (label)", 10, 0, 9, "");
 			
@@ -155,28 +188,30 @@ public class Speckle_Inspector implements PlugInFilter {
 			if(gd.wasCanceled()) {
 				return;
 			}
-			bigObjects = gd.getNextChoice();
-			smallObjects = gd.getNextChoice();
+			primaryObjects = gd.getNextChoice();
+			secondaryObjects = gd.getNextChoice();
 			redirectToImage = gd.getNextChoice();
-			minObjectSize = gd.getNextNumber();
-			maxObjectSize = gd.getNextNumber();
-			minObjectCirc = gd.getNextNumber();
-			maxObjectCirc = gd.getNextNumber();
-			minSpeckleNumber = gd.getNextNumber();
-			maxSpeckleNumber = gd.getNextNumber();
-			minSpeckleSize = gd.getNextNumber();
-			maxSpeckleSize = gd.getNextNumber();
+			minPrimarySize = gd.getNextNumber();
+			maxPrimarySize = gd.getNextNumber();
+			minPrimaryCirc = gd.getNextNumber();
+			maxPrimaryCirc = gd.getNextNumber();
+			minSecondaryNumber = gd.getNextNumber();
+			maxSecondaryNumber = gd.getNextNumber();
+			minSecondarySize = gd.getNextNumber();
+			maxSecondarySize = gd.getNextNumber();
+			minSecondaryCircularity = gd.getNextNumber();
+			maxSecondaryCircularity = gd.getNextNumber();
 			
+			showRoiManager = gd.getNextChoice();
 			excludeEdge = gd.getNextBoolean();
 			if(excludeEdge==true) {
-				analyzerOptions |= ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;
+				primaryAnalyzerOptions |= ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;
 			} else {
-				analyzerOptions &= ~ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;
+				primaryAnalyzerOptions &= ~ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES;
 			}
-			showRoiManager = gd.getNextBoolean();
 			showSpeckleList = gd.getNextBoolean();
 			showStatisticsLog = gd.getNextBoolean();
-			individualRoiAnalysis = gd.getNextBoolean();
+			secondaryObjectAnalysis = gd.getNextBoolean();
 			fontSize = gd.getNextNumber();
 
 			if(gd.invalidNumber()) {
@@ -184,42 +219,49 @@ public class Speckle_Inspector implements PlugInFilter {
 				return;
 			}
 		
-		if(bigObjects.equals(smallObjects)) {
+		if(primaryObjects.equals(secondaryObjects)) {
 			IJ.error("images need to be different");
 			return;
 		}
-		ImagePlus bigObjectImp = WindowManager.getImage(bigObjects);
-		bigObjectImp.killRoi();
-		ImageProcessor bigObjectIP = bigObjectImp.getProcessor();
-		ImagePlus smallObjectImp = WindowManager.getImage(smallObjects);
-		smallObjectImp.killRoi();
-		ImageProcessor smallObjectIP = smallObjectImp.getProcessor();
+		ImagePlus primaryObjectImp = WindowManager.getImage(primaryObjects);
+		primaryObjectImp.killRoi();
+		ImageProcessor bigObjectIP = primaryObjectImp.getProcessor();
+		ImagePlus secondaryObjectImp = WindowManager.getImage(secondaryObjects);
+		secondaryObjectImp.killRoi();
+		ImageProcessor secondaryObjectIP = secondaryObjectImp.getProcessor();
 
-		if(!bigObjectIP.isBinary() || !smallObjectIP.isBinary()) {
+		if(!bigObjectIP.isBinary() || !secondaryObjectIP.isBinary()) {
 			IJ.error("works with 8-bit binary images only");
 			return;
 		}
 		
-		if((bigObjectImp.getWidth()!=smallObjectImp.getWidth()) || bigObjectImp.getHeight()!=smallObjectImp.getHeight()) {
+		if((primaryObjectImp.getWidth()!=secondaryObjectImp.getWidth()) || primaryObjectImp.getHeight()!=secondaryObjectImp.getHeight()) {
 			IJ.error("images need to be of the same size");
 			return;
 		}
 		
-		ResultsTable rt = new ResultsTable();
+		ResultsTable primaryResultsTable = new ResultsTable();
 		
-		ParticleAnalyzer analyzeObjects = new ParticleAnalyzer(analyzerOptions, measurementFlags, rt, minObjectSize, maxObjectSize, minObjectCirc, maxObjectCirc);
-		analyzeObjects.analyze(bigObjectImp);
-		int objectNumber = rt.getCounter();
+		ParticleAnalyzer analyzeObjects = new ParticleAnalyzer(primaryAnalyzerOptions, measurementFlags, primaryResultsTable, minPrimarySize, maxPrimarySize, minPrimaryCirc, maxPrimaryCirc);
+		analyzeObjects.analyze(primaryObjectImp);
+		int objectNumber = primaryResultsTable.getCounter();
 
-		//close an existing RoiManager before instantiating a new one for this analysis
+		//clear an existing RoiManager before instantiating a new one for this analysis
 		RoiManager oldRM = RoiManager.getInstance2();
 		if(oldRM!=null) {
 			oldRM.close();
 		}
-		if(showRoiManager) {
-			rm = new RoiManager();
-		} else {
-			rm = new RoiManager(true);
+		
+		
+		if (showRoiManager.equals("none")) {
+			primaryRoiManager = new RoiManager(true);
+			secondaryRoiManager = new RoiManager(true);
+		} else if (showRoiManager.equals("primary")) {
+			primaryRoiManager = new RoiManager();
+			secondaryRoiManager = new RoiManager(true);
+		} else if (showRoiManager.equals("secondary")) {
+			primaryRoiManager = new RoiManager(true);
+			secondaryRoiManager = new RoiManager();
 		}
 		
 
@@ -228,52 +270,74 @@ public class Speckle_Inspector implements PlugInFilter {
 		int[] cX = new int[objectNumber];
 		int[] cY = new int[objectNumber];
 
-		Calibration cal = bigObjectImp.getCalibration();
+		Calibration cal = primaryObjectImp.getCalibration();
 		Recorder rec = Recorder.getInstance();
 		if(rec!=null) {
 			 Recorder.record = false;
 		}
 		
-		for(int i=0; i<objectNumber; i++) {
-			x[i] = (int) rt.getValue("XStart", i);
-			y[i] = (int) rt.getValue("YStart", i);
-			cX[i] = (int) cal.getRawX(rt.getValue("X", i));
-			cY[i] = (int) cal.getRawY(rt.getValue("Y", i));
-			IJ.doWand(bigObjectImp, x[i], y[i], 0.0, "8-connected");
-			bigObjectImp.getRoi().setName(Integer.toString(i+1));
-			rm.addRoi(bigObjectImp.getRoi());
+		for(int po=0; po<objectNumber; po++) {
+			x[po] = (int) primaryResultsTable.getValue("XStart", po);
+			y[po] = (int) primaryResultsTable.getValue("YStart", po);
+			cX[po] = (int) cal.getRawX(primaryResultsTable.getValue("X", po));
+			cY[po] = (int) cal.getRawY(primaryResultsTable.getValue("Y", po));
+			IJ.doWand(primaryObjectImp, x[po], y[po], 0.0, "8-connected");
+			primaryObjectImp.getRoi().setName(Integer.toString(po+1));
+			primaryRoiManager.addRoi(primaryObjectImp.getRoi());
 			
 		}
-		//Roi[] objectRoi = rm.getRoisAsArray();  //this  created bounding boxes instead of the original ROIs
-
+		
 		if(rec!=null) {
 			 Recorder.record = true;
 		}
 		
 		//analyze speckles
-		rt.reset();
-		int[] specklesPerObject = new int[objectNumber];
+		//primaryResultsTable.reset();
+		int[] secondaryCountPerPrimaryObject = new int[objectNumber];
 		
 		if(!redirectToImage.equalsIgnoreCase("None")) {
 			Analyzer.setRedirectImage(WindowManager.getImage(redirectToImage));
 		}
 		
-		for(int o=0; o<objectNumber; o++) {
-			ParticleAnalyzer analyzeSpeckles = new ParticleAnalyzer(speckleAnalyzerOptions, measurementFlags, rt, minSpeckleSize, maxSpeckleSize);
-			//smallObjectImp.killRoi();
-			smallObjectImp.setRoi(rm.getRoi(o), false);
-			analyzeSpeckles.analyze(smallObjectImp, smallObjectIP);
-			specklesPerObject[o] = rt.getCounter();
+		ResultsTable secondaryResultsTable = new ResultsTable();
+		int secondaryX;
+		int secondaryY;
+		//int[] secondaryCenterX = new int[objectNumber];
+		//int[] secondaryCenterY = new int[objectNumber];
+				
+		for(int primaryObjectIndex=0; primaryObjectIndex < objectNumber; primaryObjectIndex++) {
+			ParticleAnalyzer analyzeSpeckles = new ParticleAnalyzer(secondaryAnalyzerOptions, measurementFlags, secondaryResultsTable, minSecondarySize, maxSecondarySize, minSecondaryCircularity, maxSecondaryCircularity);
+
+			secondaryObjectImp.setRoi(primaryRoiManager.getRoi(primaryObjectIndex), false);
+			analyzeSpeckles.analyze(secondaryObjectImp, secondaryObjectIP);
+			secondaryCountPerPrimaryObject[primaryObjectIndex] = secondaryResultsTable.getCounter();
+			secondaryObjectImp.killRoi();
 			//IJ.log(""+specklesPerObject[o]);
+
 			
-			rt.reset();
+			if (showRoiManager.equals("secondary")) {
+				for (int so = 0; so < secondaryCountPerPrimaryObject[primaryObjectIndex]; so++) {
+					secondaryX = (int) secondaryResultsTable.getValue("XStart", so);
+					secondaryY = (int) secondaryResultsTable.getValue("YStart", so);
+					//System.out.println(secondaryX + " / " + secondaryY);
+					//secondaryCenterX[so] = (int) cal.getRawX(secondaryResultsTable.getValue("X", so));
+					//secondaryCenterY[so] = (int) cal.getRawY(secondaryResultsTable.getValue("Y", so));
+					IJ.doWand(secondaryObjectImp, secondaryX, secondaryY, 0.0, "8-connected");
+					Roi secondaryObjectRoi = secondaryObjectImp.getRoi();
+					secondaryObjectRoi.setName((primaryObjectIndex+1) + "-" + (so+1));
+					secondaryRoiManager.addRoi(secondaryObjectRoi);
+					secondaryObjectImp.killRoi();
+				}				
+			}
+			
+			secondaryResultsTable.reset();
 			analyzeSpeckles = null;
 		}
 		
 		//create output image
-		bigObjectImp.killRoi();
-		ImagePlus outputImp = bigObjectImp.duplicate();
-		outputImp.setTitle(WindowManager.getUniqueName("Inspector of " + bigObjects));
+		primaryObjectImp.killRoi();
+		ImagePlus outputImp = primaryObjectImp.duplicate();
+		outputImp.setTitle(WindowManager.getUniqueName("Inspector of " + primaryObjects));
 		ImageConverter outputImgConverter = new ImageConverter(outputImp);
 		outputImgConverter.convertToRGB();
 		ImageProcessor outputIP = outputImp.getProcessor();
@@ -284,46 +348,54 @@ public class Speckle_Inspector implements PlugInFilter {
 		FloodFiller outputFloodFiller = new FloodFiller(outputIP);
 		
 		for(int c=0; c<objectNumber; c++) {
-			if(specklesPerObject[c]>=minSpeckleNumber && specklesPerObject[c]<=maxSpeckleNumber) {
+			if(secondaryCountPerPrimaryObject[c]>=minSecondaryNumber && secondaryCountPerPrimaryObject[c]<=maxSecondaryNumber) {
 				outputIP.setColor(Color.magenta);
 				outputFloodFiller.fill8(x[c], y[c]);
 				positive=positive+1;
-				PosPart=PosPart+specklesPerObject[c];
-			} else if(specklesPerObject[c]<minSpeckleNumber) {
+				PosPart=PosPart+secondaryCountPerPrimaryObject[c];
+			} else if(secondaryCountPerPrimaryObject[c]<minSecondaryNumber) {
 				outputIP.setColor(Color.blue);
 				outputFloodFiller.fill8(x[c], y[c]);
 				less=less+1;
-				NegLess=NegLess+specklesPerObject[c];
-			} else if(specklesPerObject[c]>maxSpeckleNumber) {
+				NegLess=NegLess+secondaryCountPerPrimaryObject[c];
+			} else if(secondaryCountPerPrimaryObject[c]>maxSecondaryNumber) {
 				Color drawColor = new Color(0,93,0);
 				outputIP.setColor(drawColor);
 				outputFloodFiller.fill8(x[c], y[c]);
 				more=more+1;
-				NegMore=NegMore+specklesPerObject[c];
+				NegMore=NegMore+secondaryCountPerPrimaryObject[c];
 			}
 			outputIP.setColor(Color.white);
-			outputIP.drawString("" + (c+1) + "-(" + specklesPerObject[c] + ")", cX[c]-((int)(fontSize*1.5)), cY[c]+((int)(fontSize/2)));
+			outputIP.drawString("" + (c+1) + "-(" + secondaryCountPerPrimaryObject[c] + ")", cX[c]-((int)(fontSize*1.5)), cY[c]+((int)(fontSize/2)));
 		}
 		outputFloodFiller = null;
 		outputImp.show();
 		//outputImp.updateAndDraw();
 
+		if(showRoiManager.equals("primary")) {
+			primaryRoiManager.setVisible(true);
+		} else if (showRoiManager.equals("secondary")) {
+			secondaryRoiManager.setVisible(true);
+		}
+		
+		
+		
 		//write speckle counts in speckle list (a results table)
 		if(showSpeckleList==true) {
 			ResultsTable speckleList = new ResultsTable();
 			speckleList.setPrecision(0);
 			speckleList.setValue("Object", 0, 1);
-			speckleList.setValue("Speckles", 0, specklesPerObject[0]);
+			speckleList.setValue("Speckles", 0, secondaryCountPerPrimaryObject[0]);
 			speckleList.incrementCounter();
 			for(int r=1; r<objectNumber; r++) {
 				speckleList.addValue("Object", r+1);
-				speckleList.setValue("Speckles", r, specklesPerObject[r]);
+				speckleList.setValue("Speckles", r, secondaryCountPerPrimaryObject[r]);
 				if(r<objectNumber-1) {
 					speckleList.incrementCounter();
 				}
 			}
 			speckleList.showRowNumbers(false);
-			speckleList.show("Speckle List " + bigObjects);
+			speckleList.show("Speckle List " + primaryObjects);
 		}
 
 		//calculate statistics and IJ.log to log window
@@ -332,10 +404,10 @@ public class Speckle_Inspector implements PlugInFilter {
 		} else if((PosPart+NegLess+NegMore)==0) {
 			IJ.log("No Speckles detected");
 		} else if(showStatisticsLog) {
-			IJ.log("Object size limit min: " + minObjectSize + " / max: " + maxObjectSize);
-			IJ.log("Circularity limit min: " + minObjectCirc + " / max: " + maxObjectCirc);
-			IJ.log("Speckle no. limit min: " + minSpeckleNumber + " / max: " + maxSpeckleNumber);
-			IJ.log("Speckle size limit min: " + minSpeckleSize + " / max: " + maxSpeckleSize);
+			IJ.log("Object size limit min: " + minPrimarySize + " / max: " + maxPrimarySize);
+			IJ.log("Circularity limit min: " + minPrimaryCirc + " / max: " + maxPrimaryCirc);
+			IJ.log("Speckle no. limit min: " + minSecondaryNumber + " / max: " + maxSecondaryNumber);
+			IJ.log("Speckle size limit min: " + minSecondarySize + " / max: " + maxSecondarySize);
 			IJ.log("----------------------------------------------------");
 			IJ.log("White features are excluded from the analysis");
 			IJ.log("All Objects: " + objectNumber);
@@ -363,8 +435,8 @@ public class Speckle_Inspector implements PlugInFilter {
 			IJ.log(" Speckle Inspector plugin by BioVoxxel/Dr. Jan Brocher, 2014, " + version);
 		}
 
-		if(individualRoiAnalysis) {
-			analyzeRoiSet(rm, smallObjectImp);
+		if(secondaryObjectAnalysis) {
+			analyzeRoiSet(primaryRoiManager, secondaryObjectImp);
 		}
 
 		analyzeObjects = null;
@@ -393,6 +465,7 @@ public class Speckle_Inspector implements PlugInFilter {
 
 
 	public void analyzeRoiSet(RoiManager rm, ImagePlus roiAnalysisImp) {
+		
 		//IJ.run("Set Measurements...", "area mean standard modal min centroid center perimeter bounding fit shape feret's integrated median skewness kurtosis area_fraction stack display redirect=None decimal=3");
 		int counter = rm.getCount();
 		ImageProcessor roiAnalysisIP = roiAnalysisImp.getProcessor();
@@ -402,7 +475,7 @@ public class Speckle_Inspector implements PlugInFilter {
 			//IJ.log(""+n+". "+roiArray[n]);
 			roiAnalysisImp.killRoi();
 			roiAnalysisImp.setRoi(rm.getRoi(n), false);
-			ParticleAnalyzer roiAnalyzer = new ParticleAnalyzer(ParticleAnalyzer.RECORD_STARTS, measurementFlags, roiResults, minSpeckleSize, maxSpeckleSize); //original setup, only kept if current code not functional
+			ParticleAnalyzer roiAnalyzer = new ParticleAnalyzer(ParticleAnalyzer.RECORD_STARTS, measurementFlags, roiResults, minSecondarySize, maxSecondarySize, minSecondaryCircularity, maxSecondaryCircularity); //original setup, only kept if current code not functional
 			roiAnalyzer.analyze(roiAnalysisImp, roiAnalysisIP);
 			//prepare this Particle Analyzer for garbage collection
 			roiAnalyzer = null;
