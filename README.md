@@ -26,7 +26,7 @@ The BioVoxxel Toolbox is a suite which contains plugins and some macros dealing 
 The [BioVoxxel Toolbox menu](https://github.com/biovoxxel/BioVoxxel-Toolbox/blob/master/Biovoxxel_Plugins/src/main/java/toolbox.menu/BioVoxxel_Toolbox.ijm) for Fiji is in a seperate menu and can be installed together with the plugins via the [BioVoxxel update site](https://imagej.net/Following_an_update_site). 
 
 # License
-The BioVoxxel Toolbox project runs under the [BSD-3 License](./LICENSE/LICENSE.md)
+The BioVoxxel Toolbox project runs under the [BSD-3 License](./LICENSE.md)
 
 # BioVoxxel on the web
 
