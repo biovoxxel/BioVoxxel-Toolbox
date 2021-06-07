@@ -6,6 +6,7 @@ import java.awt.Color;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.WindowManager;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
@@ -39,30 +40,6 @@ import ij.process.ImageProcessor;
  *	WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE 
  *	USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- */
-
-/**
- * 
- * Copyright (C), 2014, Jan Brocher / BioVoxxel
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * IN NO EVENT WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MODIFIES 
- * AND/OR CONVEYS THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, 
- * INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING 
- * OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO 
- * LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR 
- * THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), 
- * EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF 
- * SUCH DAMAGES.
  * 
  * Please cite BioVoxxel and Jan Brocher when you publish results 
  * obtained by usage of this plugin or a modified version of it
@@ -81,7 +58,8 @@ public class Pseudo_flat_field_correction implements ExtendedPlugInFilter, Dialo
 	private int nPasses = 1;
 	private int pass; 
 	private double radius = 50.0d;
-	private boolean brightness;
+	private boolean previousHideBackground = Prefs.getBoolean("pseudo.flatfield.correction.visibility", true);
+	public static boolean hideBackground;
 	
 	public int setup(String arg, ImagePlus imp) {
 		if(WindowManager.getImageCount()==0) {
@@ -105,6 +83,7 @@ public class Pseudo_flat_field_correction implements ExtendedPlugInFilter, Dialo
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
 		GenericDialog gd = new GenericDialog("Pseudo flat-field correction");
 			gd.addNumericField("Blurring radius", radius, 1, 6, "Pixels");
+			gd.addCheckbox("hide background", previousHideBackground);
 			gd.addPreviewCheckbox(pfr); 
 			gd.addDialogListener(this);
 			gd.showDialog();
@@ -118,9 +97,11 @@ public class Pseudo_flat_field_correction implements ExtendedPlugInFilter, Dialo
 
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
 		radius = gd.getNextNumber();
+		hideBackground = gd.getNextBoolean();
 		if (gd.invalidNumber() || radius<0.5) {
 			return false;
 		}
+		Prefs.set("pseudo.flatfield.correction.visibility", hideBackground);
 		return true;
 	}
 
@@ -183,14 +164,18 @@ public class Pseudo_flat_field_correction implements ExtendedPlugInFilter, Dialo
 
 		existingPreviewImage = WindowManager.getImage(updatedBlurImageTitle);
 		//this part visualizes a background image to be able to determine a sufficiently big Gaussian Blur
-		if(existingPreviewImage!=null) {
-			updatedBlurImage.setProcessor(visualizedBlur);
-			blurredBackground.blurGaussian(visualizedBlur, radius, radius, 0.02);
-			updatedBlurImage.updateAndDraw();
-		} else {
-			updatedBlurImage.setProcessor(visualizedBlur);
-			blurredBackground.blurGaussian(visualizedBlur, radius, radius, 0.02);
-			updatedBlurImage.show();
+		if (!hideBackground) {
+			if(existingPreviewImage!=null) {
+				updatedBlurImage.setProcessor(visualizedBlur);
+				blurredBackground.blurGaussian(visualizedBlur, radius, radius, 0.02);
+				updatedBlurImage.updateAndDraw();
+			} else {
+				updatedBlurImage.setProcessor(visualizedBlur);
+				blurredBackground.blurGaussian(visualizedBlur, radius, radius, 0.02);
+				updatedBlurImage.show();
+			}
+		} else if(hideBackground && existingPreviewImage != null) {
+			existingPreviewImage.close();
 		}
 
 		if(imp.getBitDepth()==24) {
