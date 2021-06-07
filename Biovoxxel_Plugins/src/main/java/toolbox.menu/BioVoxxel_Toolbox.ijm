@@ -2,7 +2,7 @@
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------
 // first release date: 09/30/2015
-// latest release date: 11/12/2020
+// latest release date: 06/07/2021
 //--------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------
 
@@ -33,13 +33,13 @@
  *
  */
 
-requires("1.50a");
+requires("1.53c");
 
 // BioVoxxel Macro Menu
 
-	var filemenu = newMenu("BioVoxxel Macros Menu Tool", newArray("Extended Particle Analyzer", "Field-of-view measure correction", "Shape Descriptor Maps", "Binary Feature Extractor", "Speckle Inspector", "Watershed Irregular Features", "EDM Binary Operations", "Auto Binary Masking", "-", "Threshold Check", "-", "Filter Check", "-", "Flat-field correction", "Pseudo flat-field correction", "Convoluted Background Subtraction", "Scaled Intensity Plots", "Stack Line Plots", "-", "Gaussian weighted Median", "Difference of Gaussian", "Difference from Median", "Adaptive Filter", "Recursive Filters", "-", "Hyperstack Color Coding", "-", "SSIDC Cluster Indicator", "-", "Neighbor Analysis", "2D Particle Distribution", "Cluster Indicator", "-", "About"));
+	var filemenu = newMenu("BioVoxxel Menu Tool", newArray("Extended Particle Analyzer", "Field-of-view measure correction", "Shape Descriptor Maps", "Binary Feature Extractor", "Speckle Inspector", "Watershed Irregular Features", "EDM Binary Operations", "-", "Threshold Check", "-", "Filter Check", "-", "Flat-field correction", "Pseudo flat-field correction", "Convoluted Background Subtraction", "-", "Gaussian weighted Median", "Difference of Gaussian", "Difference from Median", "Adaptive Filter", "Recursive Filters", "-", "Hyperstack Color Coding", "-", "SSIDC Cluster Indicator", "-", "Neighbor Analysis", "2D Particle Distribution", "Cluster Indicator", "-", "About"));
 	
-	macro "BioVoxxel Macros Menu Tool - C000C010C020C030C040C050Df9C050D62C050D75C060D87C060D76C060D61C060Db8C060D63C060D74Da8Dc8C060D50De9C060D81C060De7C060D91Dc2C060D77Dd4Dd8C060De8C070D71D97Dd3C070D73D78C070D51D60De6C070D06D5aD69Db2C070D4bD86Dd5C070D3dD98Da7C070D64Da2C070D3cD72D82D83D84D85D92D93D94D95D96Da1Da3Da4Da5Da6Db3Db4Db5Db6Db7Dc3Dc4Dc5Dc6Dc7Dd6Dd7C070D2dC070Dd9C070C080D2cC080D15D19Dd2C080D88C080D18C080D24DafC080D33C080D2bC080D42D65C080De5C080D52C080D4cC080D17D41D68C080C090D2aD59C090D9fDb1Dc9C090D32D4aD5bC090D1aD3bC090D16D53D66C090D25D29D5eD6eDf8C090D26D27D28D34D35D36D37D38D39D3aD43D44D45D46D47D48D49D54D55D56D57D58D67DeaC090D6aC090DbeC090D07C090D23DdbC090D70D7eDcdC090D79DccC0a0D4eDb9C0a0DbdDdcC0a0D14C0a0D8eDaeC0a0D4dD8fC0a0D05Da9C0a0DebC0b0Dc1DfaC0b0D9eC0b0D5cD5dD99DdaC0b0D6bD6cD6dD7aD7bD7cD7dD89D8aD8bD8cD8dD9aD9bD9cD9dDaaDabDacDadDbaDbbDbcDcaDcbC0b0De4C0b0D1bD3eC0b0D80C0b0C0c0Df7C0c0D08C0c0D7fC0c0C0d0D2eC0d0Dd1C0d0D6fC0d0C0e0C0f0D5fC0f0"{
+	macro "BioVoxxel Menu Tool - C000C010C020C030C040C050Df9C050D62C050D75C060D87C060D76C060D61C060Db8C060D63C060D74Da8Dc8C060D50De9C060D81C060De7C060D91Dc2C060D77Dd4Dd8C060De8C070D71D97Dd3C070D73D78C070D51D60De6C070D06D5aD69Db2C070D4bD86Dd5C070D3dD98Da7C070D64Da2C070D3cD72D82D83D84D85D92D93D94D95D96Da1Da3Da4Da5Da6Db3Db4Db5Db6Db7Dc3Dc4Dc5Dc6Dc7Dd6Dd7C070D2dC070Dd9C070C080D2cC080D15D19Dd2C080D88C080D18C080D24DafC080D33C080D2bC080D42D65C080De5C080D52C080D4cC080D17D41D68C080C090D2aD59C090D9fDb1Dc9C090D32D4aD5bC090D1aD3bC090D16D53D66C090D25D29D5eD6eDf8C090D26D27D28D34D35D36D37D38D39D3aD43D44D45D46D47D48D49D54D55D56D57D58D67DeaC090D6aC090DbeC090D07C090D23DdbC090D70D7eDcdC090D79DccC0a0D4eDb9C0a0DbdDdcC0a0D14C0a0D8eDaeC0a0D4dD8fC0a0D05Da9C0a0DebC0b0Dc1DfaC0b0D9eC0b0D5cD5dD99DdaC0b0D6bD6cD6dD7aD7bD7cD7dD89D8aD8bD8cD8dD9aD9bD9cD9dDaaDabDacDadDbaDbbDbcDcaDcbC0b0De4C0b0D1bD3eC0b0D80C0b0C0c0Df7C0c0D08C0c0D7fC0c0C0d0D2eC0d0Dd1C0d0D6fC0d0C0e0C0f0D5fC0f0"{
 
 		BVCmd = getArgument();
 		if (BVCmd!="-") {
@@ -620,10 +620,14 @@ function CountCorrection() {
 //version 0.5 (07/02/2014), included Compactness and Extent and improved performance
 //version 0.6 (23/02/2014), exchanged distribution plots for interactive plots
 //version 0.7 (06/02/2015), Thanks to Gunnar Schley "Roundness" was added to the list of shape descriptors
+//version 0.8 (07/06/2021), thanks to Jan Valečka added complete LUT support
 //------------------------------------------------------------------------------------------
 
 function ShapeDescriptorMaps() {
+	showValues = false;
 	original=getTitle();
+	lutPanel = getList("LUTs");
+	previouslyChosenLut = call("ij.Prefs.get", "shape.descriptor.maps.lut", "Fire");
 	type=is("binary");
 	if(type==false) { exit("works only with 8-bit binary images"); }
 	getDimensions(width, height, channels, slices, frames);
@@ -638,7 +642,8 @@ function ShapeDescriptorMaps() {
 		Dialog.addCheckbox("include holes", false);
 		Dialog.addCheckbox("show calibration bar", true);
 		Dialog.addCheckbox("enable interactive plots", true);
-		Dialog.addChoice("LUT", newArray("Fire", "Green Fire Blue", "Cyan Hot", "Red Hot", "Thermal", "cool"), "Fire");
+		Dialog.addNumber("Data plot bins (0=auto)", 0);
+		Dialog.addChoice("LUT", lutPanel, previouslyChosenLut);
 		Dialog.addMessage("if interactive plots are active \npress 'Esc' to finally stop macro!\nResults table will then appear.");
 		Dialog.addHelp("www.biovoxxel.de/macros.html");
 		Dialog.show();
@@ -648,7 +653,10 @@ function ShapeDescriptorMaps() {
 		includeHoles=Dialog.getCheckbox();
 		calibrationbar=Dialog.getCheckbox();
 		distributionPlot=Dialog.getCheckbox();
+		binning = Dialog.getNumber();
 		LUT=Dialog.getChoice();
+			call("ij.Prefs.set", "shape.descriptor.maps.lut", LUT);
+
 
 	setBatchMode(true);
 	//prepare original image for analysis
@@ -707,9 +715,9 @@ function ShapeDescriptorMaps() {
 	
 	for(i=0; i<allParticles; i++) {
 		//read in positional information
-		X[i]=getResult("X", i);
-		Y[i]=getResult("Y", i);
-		toUnscaled(X[i], Y[i]); //bug-fix in version 0.2
+		X[i]=getResult("XStart", i);
+		Y[i]=getResult("YStart", i);
+		//toUnscaled(X[i], Y[i]); //bug-fix in version 0.2
 		//read in shape descriptors 
 		Area[i]=getResult("Area", i);
 		Peri[i]=getResult("Perim.", i);
@@ -741,7 +749,7 @@ function ShapeDescriptorMaps() {
 		biggestValue=newArray("biggestArea", "biggestPeri", "biggestFeret", "biggestAngle", "biggestFeretAngle", "biggestCirc", "biggestRounsness", "biggestAR", "biggestSolidity", "biggestCompactness", "biggestExtent");
 	}
 	
-	/*
+	
 	if(showValues==true) {
 	 	//print biggest values in the Log winsow
 		print("highest values for individual shape descriptors");
@@ -757,7 +765,7 @@ function ShapeDescriptorMaps() {
 		print("Compactness:   "+biggestCompactness);
 		print("Extent:   "+biggestExtent);
 	}
-	*/
+	
 	
 	//*******************************************************************
 	
@@ -781,13 +789,13 @@ function ShapeDescriptorMaps() {
 	//color code shape descriptor maps
 	shapeDescriptors=newArray("Area", "Perim.", "Feret", "Angle", "FeretAngle", "Circ.", "Round", "AR", "Solidity", "Compactness", "Extent");
 	mapNames=newArray("Area", "Perimeter", "Max Feret", "Angle", "Feret Angle", "Circularity", "Roundness", "Aspect Ratio", "Solidity", "Compactness", "Extent");
-	for(m=0; m<11; m++) {
+	for(m=0; m<shapeDescriptors.length; m++) {
 		selectWindow(input);
 		run("Duplicate...", "title=["+mapNames[m]+"]");
 		map=getTitle();
 		selectWindow(map);
 		for(i=0; i<allParticles; i++) {
-			doWand(X[i],Y[i]);
+			doWand(X[i],Y[i], 0.0, "8-connected");
 			if(shapeDescriptors[m]=="Area") {
 				value=round(255/biggestArea*Area[i]);
 			}
@@ -821,6 +829,7 @@ function ShapeDescriptorMaps() {
 			if(shapeDescriptors[m]=="Extent") {
 				value=round(255/biggestExtent*Extent[i]);
 			}
+			//print(X[i] + "/" + Y[i] + "/" + value);
 			setForegroundColor(value, value, value);
 			run("Fill");
 		}
@@ -862,9 +871,9 @@ function ShapeDescriptorMaps() {
 		setBackgroundColor(0, 0, 0);
 		run("Canvas Size...", "width=256 height=80 position=Top-Center");
 		setFont("SansSerif", 11, "Bold");
-		drawString("smallest      (Area, Perimeter, AR)        biggest", 5, 45);
+		drawString("smallest (0)    (Area, Perimeter, AR)     biggest", 5, 45);
 		drawString("0 deg             (Angle, Feret Angle)         180 deg", 5, 60);
-		drawString("0   (Circ., Round, Solidity, Compact., Extent)   1", 5, 75);
+		drawString("0    (Circ., Round, Solid., Compact., Ext.)    max", 5, 75);
 		setBatchMode("show");
 	}
 
@@ -875,17 +884,23 @@ function ShapeDescriptorMaps() {
 		leftButton=16;
 		while(isOpen(result)) {
 			getCursorLoc(x, y, z, clicked);
-			wait(500);
+			wait(250);
 			if(clicked&leftButton!=0 && isActive(currentID) && z>0) {
 				resultEntries = nResults;
-				selectedData = newArray(resultEntries+1);
-				selectedData[0] = 0;
-				for(r=0; r<resultEntries; r++) {
-					selectedData[r] = getResult(shapeDescriptors[z-1], r);
-				}
 				
-				Array.sort(selectedData);
-				Plot.create("SDM-"+getMetadata("Label"), "Particle", getMetadata("Label"), selectedData);
+				selectedData = Table.getColumn(shapeDescriptors[z-1]);
+				selectedData = Array.concat(newArray(1), selectedData);
+				
+				//bins = selectedData.length / 10;
+				
+				Array.getStatistics(selectedData, dataMin, dataMax, dataMean, DataStdDev);
+				Plot.create("SDM-"+getMetadata("Label"), "Particle", getMetadata("Label"));
+				if(binning == 0) {
+					Plot.addHistogram(selectedData, 0, dataMean);
+				} else {
+					Plot.addHistogram(selectedData, dataMax/binning, dataMean);
+				}
+				Plot.setStyle(0, "black,#a0a0ff,1.0,Separate Bars");
 				Plot.show();
 				selectWindow(result);
 			}
@@ -2453,6 +2468,7 @@ function ContrastDetection() {
 //Keeps the color coded Hyperstack in addition to a color coded Z-projection stack. Z-Projection type can be selected
 //Author: Jan Brocher/BioVoxxel, 2013
 //Version: 0.1 (25/04/2013)
+//version 0.2 (07/06/2021), thanks to Jan Valečka added complete LUT support
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
 function HyperstackColorCoding() {
@@ -2460,6 +2476,8 @@ function HyperstackColorCoding() {
 	original=getTitle();
 	type=Stack.isHyperstack;
 	BitDepth=bitDepth();
+	lutPanel = getList("LUTs");
+	previouslyChosenLut = call("ij.Prefs.get", "hyperstack.color.coding.lut", "Fire");
 	run("Select None");
 	if(isOpen("Log")==1) { selectWindow("Log"); run("Close"); }
 	if (BitDepth!=8) {
@@ -2481,7 +2499,7 @@ function HyperstackColorCoding() {
 		} else if (frames==1) {
 			Dialog.addChoice("Color code", newArray("Volume"));
 		}
-		Dialog.addChoice("LUT", newArray("Spectrum", "Rainbow RGB", "Fire", "Ice", "16_colors", "cool", "Green Fire Blue"), "Spectrum");
+		Dialog.addChoice("LUT", lutPanel, previouslyChosenLut);
 		if(slices>1) {
 			Dialog.addCheckbox("Z-Projection", true);
 			Dialog.addChoice("Projection type", newArray("Average Intensity", "Max Intensity", "Min Intensity", "Sum Slices", "Standard Deviation", "Median"), "Max Intensity");
@@ -2491,6 +2509,8 @@ function HyperstackColorCoding() {
 		Dialog.show();
 		Dimension=Dialog.getChoice();
 		LUT=Dialog.getChoice();
+			call("ij.Prefs.set", "hyperstack.color.coding.lut", LUT);
+			
 		if(slices>1) {
 			ZProject=Dialog.getCheckbox();
 			ProjectType=Dialog.getChoice();
