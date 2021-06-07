@@ -894,7 +894,7 @@ function ShapeDescriptorMaps() {
 				//bins = selectedData.length / 10;
 				
 				Array.getStatistics(selectedData, dataMin, dataMax, dataMean, DataStdDev);
-				Plot.create("SDM-"+getMetadata("Label"), "Particle", getMetadata("Label"));
+				Plot.create("SDM-"+getMetadata("Label"), getMetadata("Label"), "Number of objects");
 				if(binning == 0) {
 					Plot.addHistogram(selectedData, 0, dataMean);
 				} else {
