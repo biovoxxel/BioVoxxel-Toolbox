@@ -55,6 +55,7 @@ public class Binary_Feature_Extractor implements PlugInFilter {
 	}
 
 	public void run(ImageProcessor ip) {
+		
 		String[] imageNames = getOpenImageNames();
 		if(imageNames[0]=="None") {
 			IJ.error("need at least 2 binary open images");
@@ -189,34 +190,46 @@ public class Binary_Feature_Extractor implements PlugInFilter {
 		outputImp.changes = true;
 		
 		if(showCountOutput) {
-			String [] openTextWindows = WindowManager.getNonImageTitles();
-			boolean makeNewTable = true;
-			for(int w = 0; w < openTextWindows.length; w++) {
-				if(openTextWindows[w].equals("BFE_Results")) {
-					makeNewTable = false;
-				} 		
-			}
+//			String [] openTextWindows = WindowManager.getNonImageTitles();
+//			boolean makeNewTable = true;
+//			for(int w = 0; w < openTextWindows.length; w++) {
+//				if(openTextWindows[w].equals("BFE_Results")) {
+//					makeNewTable = false;
+//				} 		
+//			}
 			
-			if(makeNewTable) {
+			countTable = ResultsTable.getResultsTable("BFE_Results");
+						
+			
+			if(countTable == null) {
 				countTable = new ResultsTable();
-				countTable.setPrecision(0);
-				countTable.setValue("Image", 0, outputImageTitle);
-				countTable.setValue("Objects", 0, objectNumber);
-				countTable.setValue("Selectors", 0, selectorNumber);
-				countTable.setValue("Extracted", 0, finalCount);
-				countTable.show("BFE_Results");
 			} else {
-				IJ.renameResults("BFE_Results", "Results");
-				countTable = ResultsTable.getResultsTable();
-				countTable.setPrecision(0);
 				countTable.incrementCounter();
-				countTable.addValue("Image", outputImageTitle);
-				countTable.addValue("Objects", objectNumber);
-				countTable.addValue("Selectors", selectorNumber);
-				countTable.addValue("Extracted", finalCount);
-				IJ.renameResults("Results", "BFE_Results");
-				countTable.show("BFE_Results");
 			}
+			countTable.setPrecision(0);
+			countTable.addValue("Image", outputImageTitle);
+			countTable.addValue("Objects", objectNumber);
+			countTable.addValue("Selectors", selectorNumber);
+			countTable.addValue("Extracted", finalCount);
+			countTable.show("BFE_Results");
+			
+//				countTable.setValue("Image", 0, outputImageTitle);
+//				countTable.setValue("Objects", 0, objectNumber);
+//				countTable.setValue("Selectors", 0, selectorNumber);
+//				countTable.setValue("Extracted", 0, finalCount);
+//				countTable.show("BFE_Results");
+//			} else {
+//				//IJ.renameResults("BFE_Results", "Results");
+//				//countTable = ResultsTable.getResultsTable();
+//				countTable.setPrecision(0);
+//				countTable.incrementCounter();
+//				countTable.addValue("Image", outputImageTitle);
+//				countTable.addValue("Objects", objectNumber);
+//				countTable.addValue("Selectors", selectorNumber);
+//				countTable.addValue("Extracted", finalCount);
+//				//IJ.renameResults("Results", "BFE_Results");
+//				countTable.updateResults();
+//			}
 		}
 		
 		if(showAnalysis) {

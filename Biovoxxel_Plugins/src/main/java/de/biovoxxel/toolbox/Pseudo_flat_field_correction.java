@@ -49,8 +49,9 @@ import ij.process.ImageProcessor;
  */
 
 public class Pseudo_flat_field_correction implements ExtendedPlugInFilter, DialogListener {
-	ImagePlus imp;
 	
+	private PlugInFilterRunner pfr;
+	ImagePlus imp;
 	ImageProcessor visualizedBlur;
 	ImagePlus updatedBlurImage = new ImagePlus();
 	ImagePlus existingPreviewImage = null;
@@ -90,7 +91,8 @@ public class Pseudo_flat_field_correction implements ExtendedPlugInFilter, Dialo
 			if (gd.wasCanceled()) {
 				return DONE;
 			}
-		IJ.register(this.getClass()); 
+		IJ.register(this.getClass());
+		this.pfr = pfr;
 		return IJ.setupDialog(imp, flags);
 		
 	}
@@ -248,5 +250,10 @@ public class Pseudo_flat_field_correction implements ExtendedPlugInFilter, Dialo
 	public void setNPasses (int nPasses) {
 	        this.nPasses = nPasses;
 	        pass = 0;
+	}
+	
+	void showProgress(double percent) {
+		percent = (double)(pass-1)/nPasses + percent/nPasses;
+		IJ.showProgress(percent);
 	}
 }

@@ -75,7 +75,7 @@ import ij.process.ImageProcessor;
 			if (gd.wasCanceled()) {
 				return DONE;
 			}
-			IJ.register(this.getClass());	// protect static class variables (filter parameters) from garbage collection
+		IJ.register(this.getClass());	// protect static class variables (filter parameters) from garbage collection
 		this.pfr = pfr;
 		return IJ.setupDialog(imp, flags); // ask whether to process all slices of stack (if a stack)
 	}

@@ -77,12 +77,10 @@ import ij.process.ImageProcessor;
  * 
  * Thank you
  *
- * 13-08-15 v1.1 bugfix: speckle analysis was done earlier in the bounding box instead of the real ROI. This behaviour is solved
  * 
  */
 public class Speckle_Inspector implements PlugInFilter {
 	ImagePlus imp;
-	private String version = "v0.0.4";
 	private int flags = DOES_ALL;
 	private int nPasses, pass;
 	
@@ -386,7 +384,7 @@ public class Speckle_Inspector implements PlugInFilter {
 			speckleList.setPrecision(0);
 			speckleList.setValue("Object", 0, 1);
 			speckleList.setValue("Speckles", 0, secondaryCountPerPrimaryObject[0]);
-			speckleList.incrementCounter();
+			speckleList.incrementCounter(); //TODO
 			for(int r=1; r<objectNumber; r++) {
 				speckleList.addValue("Object", r+1);
 				speckleList.setValue("Speckles", r, secondaryCountPerPrimaryObject[r]);
@@ -400,9 +398,9 @@ public class Speckle_Inspector implements PlugInFilter {
 
 		//calculate statistics and IJ.log to log window
 		if(objectNumber==0) {
-			IJ.log("No Objects detected");
+			IJ.log("No Objects detected in " + primaryObjectImp.getTitle());
 		} else if((PosPart+NegLess+NegMore)==0) {
-			IJ.log("No Speckles detected");
+			IJ.log("No Speckles detected in " + secondaryObjectImp.getTitle());
 		} else if(showStatisticsLog) {
 			IJ.log("Object size limit min: " + minPrimarySize + " / max: " + maxPrimarySize);
 			IJ.log("Circularity limit min: " + minPrimaryCirc + " / max: " + maxPrimaryCirc);
@@ -432,7 +430,7 @@ public class Speckle_Inspector implements PlugInFilter {
 				IJ.log("   Aver. speckle no/feature: " + (NegMore/more));
 			}
 			IJ.log("----------------------------------------------------");
-			IJ.log(" Speckle Inspector plugin by BioVoxxel/Dr. Jan Brocher, 2014, " + version);
+			//IJ.log(" Speckle Inspector plugin by BioVoxxel/Dr. Jan Brocher, 2014, " + version);
 		}
 
 		if(secondaryObjectAnalysis) {
