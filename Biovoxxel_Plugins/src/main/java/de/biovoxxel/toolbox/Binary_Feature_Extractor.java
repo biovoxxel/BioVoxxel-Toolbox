@@ -190,13 +190,6 @@ public class Binary_Feature_Extractor implements PlugInFilter {
 		outputImp.changes = true;
 		
 		if(showCountOutput) {
-//			String [] openTextWindows = WindowManager.getNonImageTitles();
-//			boolean makeNewTable = true;
-//			for(int w = 0; w < openTextWindows.length; w++) {
-//				if(openTextWindows[w].equals("BFE_Results")) {
-//					makeNewTable = false;
-//				} 		
-//			}
 			
 			countTable = ResultsTable.getResultsTable("BFE_Results");
 						
@@ -213,23 +206,6 @@ public class Binary_Feature_Extractor implements PlugInFilter {
 			countTable.addValue("Extracted", finalCount);
 			countTable.show("BFE_Results");
 			
-//				countTable.setValue("Image", 0, outputImageTitle);
-//				countTable.setValue("Objects", 0, objectNumber);
-//				countTable.setValue("Selectors", 0, selectorNumber);
-//				countTable.setValue("Extracted", 0, finalCount);
-//				countTable.show("BFE_Results");
-//			} else {
-//				//IJ.renameResults("BFE_Results", "Results");
-//				//countTable = ResultsTable.getResultsTable();
-//				countTable.setPrecision(0);
-//				countTable.incrementCounter();
-//				countTable.addValue("Image", outputImageTitle);
-//				countTable.addValue("Objects", objectNumber);
-//				countTable.addValue("Selectors", selectorNumber);
-//				countTable.addValue("Extracted", finalCount);
-//				//IJ.renameResults("Results", "BFE_Results");
-//				countTable.updateResults();
-//			}
 		}
 		
 		if(showAnalysis) {
