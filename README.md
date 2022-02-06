@@ -1,5 +1,5 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/biovoxxel/BioVoxxel_Toolbox?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-
+[![DOI](https://zenodo.org/badge/240048156.svg)](https://zenodo.org/badge/latestdoi/240048156)
 
 # BioVoxxel_Toolbox
 
@@ -30,6 +30,10 @@ https://forum.image.sc/ using the tag @biovoxxel
 
 # License
 The BioVoxxel Toolbox project runs under the [BSD-3 License](https://opensource.org/licenses/BSD-3-Clause)
+
+# Citation
+
+[![DOI](https://zenodo.org/badge/240048156.svg)](https://zenodo.org/badge/latestdoi/240048156)
 
 # BioVoxxel on the web
 
