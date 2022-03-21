@@ -12,14 +12,17 @@ import org.scijava.plugin.Plugin;
 
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.plugin.RoiScaler;
 import ij.plugin.frame.RoiManager;
 
 @Plugin(type = Command.class, menuPath = "Plugins>BioVoxxel>Utilities>Leica ROI Reader")
 public class RoiReader implements Command {
 	
-	@Parameter(label = "Select (Leica) ROI file", style = "file")
+	@Parameter(label = "Select (Leica) ROI file", style = "file", required = true)
 	File roiFile;
 	
+	@Parameter(label = "Scaling factor", min = "0.01", stepSize = "0.10", required = true)
+	Double scalingFactor = 1.00;
 
 	@Override
 	public void run() {
@@ -63,6 +66,13 @@ public class RoiReader implements Command {
 					}
 					
 					Roi roi = new PolygonRoi(xCoord, yCoord, Roi.POLYGON);
+					
+					if (scalingFactor != 1.0) {
+						
+						roi = RoiScaler.scale(roi, scalingFactor, scalingFactor, false);
+
+					}
+					
 					//Roi roi = new Roi(x[0], y[0], x[1]-x[0], y[2]-y[0]);	//for pure rectangular Rois
 					roiVector.add(roi);
 				}
@@ -77,7 +87,9 @@ public class RoiReader implements Command {
 		}
 			
 		if (roiVector.size() > 0) {
-			RoiManager rm = new RoiManager();
+			
+			RoiManager rm = RoiManager.getInstance2() == null ? new RoiManager() : RoiManager.getInstance2();
+						
 			
 			for (int r = 0; r < roiVector.size(); r++) {
 				Roi roi = roiVector.get(r);
