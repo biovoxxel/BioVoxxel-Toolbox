@@ -32,8 +32,11 @@ https://forum.image.sc/ using the tag @biovoxxel
 The BioVoxxel Toolbox project runs under the [BSD-3 License](https://opensource.org/licenses/BSD-3-Clause)
 
 # Citation
-
+## Cite the toolbox plugins
 [![DOI](https://zenodo.org/badge/240048156.svg)](https://zenodo.org/badge/latestdoi/240048156)
+
+## Cite the Figure tools
+[![DOI](https://zenodo.org/badge/542074524.svg)](https://zenodo.org/badge/latestdoi/542074524)
 
 # BioVoxxel on the web
 
