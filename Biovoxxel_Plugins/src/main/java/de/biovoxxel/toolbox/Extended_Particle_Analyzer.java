@@ -691,12 +691,12 @@ public class Extended_Particle_Analyzer implements PlugInFilter {
 		ResultsTable resultsTable = new ResultsTable();
 		
 		int currentResultCount = 0;
-		String newLabel = "";
-		
+	
 		if(existingResultsTableWindow!=null && !ClearResults) {
 			ParticleAnalyzer outputPA = new ParticleAnalyzer(outputOptions, measurementFlags, resultsTable, AreaMin, AreaMax);
 			outputPA.analyze(tempImg);
 			outputImg = outputPA.getOutputImage();
+			outputImgID = outputImg.getID();
 			currentResultCount = resultsTable.getCounter();
 			//int currentColumnCount = resultsTable.getLastColumn();
 			String[] tableHeadings = resultsTable.getHeadings();
@@ -732,7 +732,7 @@ public class Extended_Particle_Analyzer implements PlugInFilter {
 			ParticleAnalyzer outputPA = new ParticleAnalyzer(outputOptions, measurementFlags, outputResultsTable, AreaMin, AreaMax);
 			outputPA.analyze(tempImg);
 			outputImg = outputPA.getOutputImage();
-			
+			outputImgID = outputImg.getID();
 			
 			for(int l=0; l<outputResultsTable.getCounter(); l++) {
 				outputResultsTable.setLabel(originalImageTitle, l);
@@ -747,14 +747,14 @@ public class Extended_Particle_Analyzer implements PlugInFilter {
 			IJ.run("Invert");
 			IJ.run("Red");
 			IJ.selectWindow(originalImgID);
-			IJ.run("Add Image...", "image=["+outputImgTitle+"] x=0 y=0 opacity=75 zero");
+			IJ.run("Add Image...", "image=["+outputImg.getTitle()+"] x=0 y=0 opacity=75 zero");
 			outputImg.changes = false;
 			outputImg.close();
 		} else if(Output.equals("Overlay Masks")) {
 			IJ.selectWindow(outputImgID);
 			IJ.run("Cyan");
 			IJ.selectWindow(originalImgID);
-			IJ.run("Add Image...", "image=["+outputImgTitle+"] x=0 y=0 opacity=75 zero");
+			IJ.run("Add Image...", "image=["+outputImg.getTitle()+"] x=0 y=0 opacity=75 zero");
 			outputImg.changes = false;
 			outputImg.close();
 		} else if(!Output.equals("Overlay Outlines") && !Output.equals("Overlay Masks") && !Output.equals("Nothing")) {
