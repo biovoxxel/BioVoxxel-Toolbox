@@ -695,8 +695,10 @@ public class Extended_Particle_Analyzer implements PlugInFilter {
 		if(existingResultsTableWindow!=null && !ClearResults) {
 			ParticleAnalyzer outputPA = new ParticleAnalyzer(outputOptions, measurementFlags, resultsTable, AreaMin, AreaMax);
 			outputPA.analyze(tempImg);
-			outputImg = outputPA.getOutputImage();
-			outputImgID = outputImg.getID();
+			if (!Output.equals("Nothing")) {
+				outputImg = outputPA.getOutputImage();
+				outputImgID = outputImg.getID();				
+			}
 			currentResultCount = resultsTable.getCounter();
 			//int currentColumnCount = resultsTable.getLastColumn();
 			String[] tableHeadings = resultsTable.getHeadings();
@@ -731,8 +733,10 @@ public class Extended_Particle_Analyzer implements PlugInFilter {
 		} else if(existingResultsTableWindow==null || ClearResults) {
 			ParticleAnalyzer outputPA = new ParticleAnalyzer(outputOptions, measurementFlags, outputResultsTable, AreaMin, AreaMax);
 			outputPA.analyze(tempImg);
-			outputImg = outputPA.getOutputImage();
-			outputImgID = outputImg.getID();
+			if (!Output.equals("Nothing")) {
+				outputImg = outputPA.getOutputImage();
+				outputImgID = outputImg.getID();				
+			}
 			
 			for(int l=0; l<outputResultsTable.getCounter(); l++) {
 				outputResultsTable.setLabel(originalImageTitle, l);
