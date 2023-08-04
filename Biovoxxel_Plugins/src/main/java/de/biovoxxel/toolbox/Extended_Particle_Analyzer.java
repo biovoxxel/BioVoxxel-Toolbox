@@ -999,6 +999,8 @@ public class Extended_Particle_Analyzer implements PlugInFilter {
 		Prefs.set("advPartAnal.CB5", IncludeHoles);
 		Reset=false;
 		Prefs.set("advPartAnal.CB6", Reset);
+		CompositeRois=false;
+		Prefs.set("advPartAnal.CB7", CompositeRois);
 	}
 	
 	//------------------------------------------------------------------------------------------------------------------------
@@ -1028,6 +1030,7 @@ public class Extended_Particle_Analyzer implements PlugInFilter {
 		ExcludeEdges=false;
 		IncludeHoles=false;
 		Reset=false;
+		CompositeRois=false;
 		Redirect = "None";
 		
 		currentPAOptions = ParticleAnalyzer.CLEAR_WORKSHEET|ParticleAnalyzer.RECORD_STARTS|ParticleAnalyzer.SHOW_MASKS;
