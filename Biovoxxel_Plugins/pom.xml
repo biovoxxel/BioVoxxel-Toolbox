@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.biovoxxel</groupId>
 	<artifactId>Biovoxxel_Plugins</artifactId>
-	<version>2.5.8</version>
+	<version>2.6.0</version>
 	<name>BioVoxxel_Toolbox</name>
 	<url>https://github.com/biovoxxel/BioVoxxel_Toolbox</url>
 	<description>The BioVoxxel toolbox contains different plugins for image filtering, tools for improved image binarization as well as tools for binary image analysis</description>
@@ -66,10 +66,12 @@
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-common</artifactId>
+			<version>2.95.0</version>
 		</dependency>
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>ij</artifactId>
+			<version>1.54f</version>
 		</dependency>
 	</dependencies>
 	

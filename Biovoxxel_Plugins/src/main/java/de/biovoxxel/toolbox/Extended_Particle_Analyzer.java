@@ -97,8 +97,8 @@ public class Extended_Particle_Analyzer implements PlugInFilter {
 	public String Output, Redirect, Correction;
 	public String unit;
 	public String reset;
-	public boolean usePixel, usePixelForOutput, Reset, DisplayResults, ClearResults, Summarize, AddToManager, ExcludeEdges, IncludeHoles; //checkbox variable
-	public int displayResults, summarize, addtoManager, excludeEdges, includeHoles; //checkbox result variables
+	public boolean usePixel, usePixelForOutput, Reset, DisplayResults, ClearResults, Summarize, AddToManager, ExcludeEdges, IncludeHoles, CompositeRois; //checkbox variable
+	public int displayResults, summarize, addtoManager, excludeEdges, includeHoles, compositeRois; //checkbox result variables
 	public int currentPAOptions = ParticleAnalyzer.CLEAR_WORKSHEET|ParticleAnalyzer.RECORD_STARTS|ParticleAnalyzer.SHOW_MASKS;
 	public int measurementFlags = Measurements.AREA|Measurements.MEAN|Measurements.STD_DEV|Measurements.MODE|Measurements.MIN_MAX|Measurements.CENTROID|Measurements.CENTER_OF_MASS|Measurements.PERIMETER|Measurements.RECT|Measurements.ELLIPSE|Measurements.SHAPE_DESCRIPTORS|Measurements.FERET|Measurements.INTEGRATED_DENSITY|Measurements.MEDIAN|Measurements.SKEWNESS|Measurements.KURTOSIS|Measurements.AREA_FRACTION|Measurements.STACK_POSITION|Measurements.LIMIT|Measurements.LABELS;
 	private int outputOptions = ParticleAnalyzer.RECORD_STARTS;
@@ -152,8 +152,8 @@ public class Extended_Particle_Analyzer implements PlugInFilter {
 		String previousCOV = Prefs.get("advPartAnal.Stringiation.coefficient", "0.00-1.00");
 		String previousShow = Prefs.get("advPartAnal.show", "Masks");
 		String previousCorrection = Prefs.get("advPartAnal.borderCountCorrection", "None");
-		String[] checkboxLabels = new String[] {"Display results", "Clear results", "Summarize", "Add to Manager", "Exclude edges", "Include holes", "Reset after analysis"};
-		boolean[] previousCheckboxGroup = new boolean[7];
+		String[] checkboxLabels = new String[] {"Display results", "Clear results", "Summarize", "Add to Manager", "Exclude edges", "Include holes", "Reset after analysis", "Composite ROIs"};
+		boolean[] previousCheckboxGroup = new boolean[8];
 		previousCheckboxGroup[0] = Prefs.get("advPartAnal.CB0", true);
 		previousCheckboxGroup[1] = Prefs.get("advPartAnal.CB1", false);
 		previousCheckboxGroup[2] = Prefs.get("advPartAnal.CB2", false);
@@ -161,6 +161,7 @@ public class Extended_Particle_Analyzer implements PlugInFilter {
 		previousCheckboxGroup[4] = Prefs.get("advPartAnal.CB4", false);
 		previousCheckboxGroup[5] = Prefs.get("advPartAnal.CB5", false);
 		previousCheckboxGroup[6] = Prefs.get("advPartAnal.CB6", false);
+		previousCheckboxGroup[7] = Prefs.get("advPartAnal.CB7", false);
 		
 		//Setup including shape descriptors
 		GenericDialog APAdialog = new GenericDialog("Extended Particle Analyzer");
@@ -293,6 +294,10 @@ public class Extended_Particle_Analyzer implements PlugInFilter {
 			
 			Reset=APAdialog.getNextBoolean();
 			Prefs.set("advPartAnal.CB6", Reset);
+			
+			CompositeRois=APAdialog.getNextBoolean();
+			Prefs.set("advPartAnal.CB7", CompositeRois);
+			
 
 	//------------------------------------------------------------------------------------------------------------------------
 
@@ -933,6 +938,14 @@ public class Extended_Particle_Analyzer implements PlugInFilter {
 		} else {
 			currentPAOptions &= ~ParticleAnalyzer.INCLUDE_HOLES;
 			outputOptions &= ~ParticleAnalyzer.INCLUDE_HOLES;
+		}
+		
+		if (CompositeRois) {
+			currentPAOptions |= ParticleAnalyzer.COMPOSITE_ROIS;
+			outputOptions |= ParticleAnalyzer.COMPOSITE_ROIS;
+		} else {
+			currentPAOptions &= ~ParticleAnalyzer.COMPOSITE_ROIS;
+			outputOptions &= ~ParticleAnalyzer.COMPOSITE_ROIS;
 		}
 	}
 
