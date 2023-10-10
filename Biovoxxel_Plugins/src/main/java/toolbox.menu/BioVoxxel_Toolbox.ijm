@@ -1405,12 +1405,13 @@ function ThresholdCheck() {
 	run("Conversions...", "scale weighted");
 
 	//Threshold name definition array
-	ThrNames = newArray("Default", "Huang", "Huang2", "Intermodes", "IsoData", "Li", "MaxEntropy", "Mean", "MinError", "Minimum", "Moments", "Otsu", "Percentile", "RenyiEntropy", "Shanbhag", "Triangle", "Yen", "Bernsen", "Contrast", "Mean (local)", "Median", "MidGrey", "Niblack", "Otsu (local)", "Phansalkar", "Sauvola");
-
+	var ThrNames = newArray("Default", "Huang", "Huang2", "Intermodes", "IsoData", "Li", "MaxEntropy", "Mean", "MinError(I)", "Minimum", "Moments", "Otsu", "Percentile", "RenyiEntropy", "Shanbhag", "Triangle", "Yen");
+	
 	//initial dialog to choose thresholds and parameters
 	var prevWhiteObj = call("ij.Prefs.get", "threshold.check.objects", true);
 	var prevIgnoreBlack = call("ij.Prefs.get", "threshold.check.ignoreBlack", false);
 	var prevIgnoreWhite = call("ij.Prefs.get", "threshold.check.ignoreWhite", false);
+	var prevIncludeLimitedMean = call("ij.Prefs.get", "threshold.check.include.limited.mean", false);
 	var prevIncludeLocal = call("ij.Prefs.get", "threshold.check.local", false);
 	var prevRadius = call("ij.Prefs.get", "threshold.check.radius", 15);
 	var prevParam1 = call("ij.Prefs.get", "threshold.check.param1", 0);
@@ -1419,10 +1420,11 @@ function ThresholdCheck() {
 	var prevExtendedQuant = call("ij.Prefs.get", "threshold.check.extendedQuant", false);
 	var prevMontage = call("ij.Prefs.get", "threshold.check.montage", false);
 	
-	Dialog.create("Threshold Check v2.1 by BioVoxxel");
+	Dialog.create("Threshold Check");
 		Dialog.addCheckbox("bright objects on dark background", prevWhiteObj);
 		Dialog.addCheckbox("ignore black (default=off)", prevIgnoreBlack);
 		Dialog.addCheckbox("ignore white (default=off)", prevIgnoreWhite);
+		Dialog.addCheckbox("include BioVoxxel Limited Mean Threshold", prevIncludeLimitedMean);
 		Dialog.addMessage("_________________________________");
 		Dialog.addCheckbox("include local thresholds", prevIncludeLocal);
 		Dialog.setInsets(0, 20, 0);
@@ -1441,6 +1443,7 @@ function ThresholdCheck() {
 		whiteObj = Dialog.getCheckbox();
 		ignoreBlack = Dialog.getCheckbox();
 		ignoreWhite = Dialog.getCheckbox();
+		includeLimitedMean = Dialog.getCheckbox();
 		includeLocal = Dialog.getCheckbox();
 		radius = Dialog.getNumber();
 		param1 = Dialog.getNumber();
@@ -1450,12 +1453,12 @@ function ThresholdCheck() {
 		doWatershed = Dialog.getCheckbox();
 		montage = Dialog.getCheckbox();
 		settings = Dialog.getCheckbox();
-		
 
 	if(settings==true) {
 		call("ij.Prefs.set", "threshold.check.objects", whiteObj);
 		call("ij.Prefs.set", "threshold.check.ignoreBlack", ignoreBlack);
 		call("ij.Prefs.set", "threshold.check.ignoreWhite", ignoreWhite);
+		call("ij.Prefs.set", "threshold.check.include.limited.mean", includeLimitedMean);
 		call("ij.Prefs.set", "threshold.check.local", includeLocal);
 		call("ij.Prefs.set", "threshold.check.radius", radius);
 		call("ij.Prefs.set", "threshold.check.param1", param1);
@@ -1463,12 +1466,27 @@ function ThresholdCheck() {
 		call("ij.Prefs.set", "threshold.check.quant", quant);
 		call("ij.Prefs.set", "threshold.check.extendedQuant", extendedQuant);
 		call("ij.Prefs.set", "threshold.check.montage", montage);
+	} else {
+		call("ij.Prefs.set", "threshold.check.objects", true);
+		call("ij.Prefs.set", "threshold.check.ignoreBlack", false);
+		call("ij.Prefs.set", "threshold.check.ignoreWhite", false);
+		call("ij.Prefs.set", "threshold.check.include.limited.mean", false);
+		call("ij.Prefs.set", "threshold.check.local", false);
+		call("ij.Prefs.set", "threshold.check.radius", 15);
+		call("ij.Prefs.set", "threshold.check.param1", 0);
+		call("ij.Prefs.set", "threshold.check.param2", 0);
+		call("ij.Prefs.set", "threshold.check.quant", false);
+		call("ij.Prefs.set", "threshold.check.extendedQuant", false);
+		call("ij.Prefs.set", "threshold.check.montage", false);
+
 	}
 
 	if(isOpen("Results")==1) {
 		selectWindow("Results");
 		run("Close"); 
 	}
+	
+	
 	//Define settings for bright/dark objects
 	if(whiteObj==true) {
 		white = " white";
@@ -1478,10 +1496,16 @@ function ThresholdCheck() {
 		clickIntensity = "highest";
 	}
 	
+	rounds = 17;
+				
 	if(includeLocal==true) {
-		rounds = 26;
-	} else {
-		rounds = 17;
+		rounds += 9;
+		ThrNames = Array.concat(ThrNames, "Bernsen", "Contrast", "Mean (local)", "Median", "MidGrey", "Niblack", "Otsu (local)", "Phansalkar", "Sauvola");
+	}
+	
+	if (includeLimitedMean) {
+		rounds += 4;
+		ThrNames = Array.concat(ThrNames, "MoLiM", "DiLiM", "MoLiM forced", "DiLiM forced");
 	}
 
 	if(ignoreBlack==true) {
@@ -1534,9 +1558,9 @@ function ThresholdCheck() {
 	run("Delete Slice");
 	run("Canvas Size...", "width="+width+" height="+height+" position=Top-Left zero");
 	close("Montage");
-	selectWindow(AutoThreshold);
+	//selectWindow(AutoThreshold);
 	//setBatchMode("show");
-	
+
 	if(includeLocal==true) {
 		//Auto Local Threshold
 		selectWindow(original);
@@ -1546,10 +1570,42 @@ function ThresholdCheck() {
 		AutoLocalThreshold = getTitle();
 		run("Canvas Size...", "width="+width+" height="+height+" position=Top-Left zero");
 		close("Montage");
-		
+				
 		run("Concatenate...", "  title=[ThresholdCheck_"+original+"] image1=["+AutoThreshold+"] image2=["+AutoLocalThreshold+"] image3=[-- None --]");
 		//setBatchMode("show");
 	}
+	
+	if(includeLimitedMean) {
+		selectWindow(original);
+		run("Duplicate...", "title=[MoLiM_"+original+"]");
+		MoLiM = getTitle();
+		run("Limited Mean", " ");
+		//setBatchMode("show");
+		
+		selectWindow(original);
+		run("Duplicate...", "title=[DiLiM_"+original+"]");
+		DiLiM = getTitle();
+		run("Limited Mean", "differential ");
+		//setBatchMode("show");
+	
+		
+		selectWindow(original);
+		run("Duplicate...", "title=[MoLiM_small_"+original+"]");
+		MoLiMforced = getTitle();
+		run("Limited Mean", " force");
+		//setBatchMode("show");
+		
+		selectWindow(original);
+		run("Duplicate...", "title=[DiLiM_small_"+original+"]");
+		DiLiMforced = getTitle();
+		run("Limited Mean", "differential force");
+		//setBatchMode("show");
+	
+		run("Concatenate...", "  title=[ThresholdCheck_"+original+"] image1=[ThresholdCheck_"+original+"] image2=["+MoLiM+"] image3=["+DiLiM+"] image4=["+MoLiMforced+"] image5=["+DiLiMforced+"] image6=[-- None --]");
+		//setBatchMode("show");
+	}
+	
+	
 	ThresholdStack = getTitle();
 	
 	if(doWatershed) {
@@ -1575,7 +1631,7 @@ function ThresholdCheck() {
 	setPasteMode("Add"); 
 	selectWindow(ThresholdStack);
 	run("Select All");
-	for (i=1;i<=rounds;i++) {
+	for (i=1; i<=rounds; i++) {
 		setSlice(i);
 		run("Paste");
 	}
@@ -1632,7 +1688,7 @@ function ThresholdCheck() {
 		setBatchMode("show");
 	} else if(montage==true && includeLocal==false) {
 		selectWindow(ThresholdStack);
-		run("Make Montage...", "columns=5 rows=4 scale=1 first=1 last="+rounds+" increment=1 border=3 font=12");
+		run("Make Montage...", "columns=5 rows=5 scale=1 first=1 last="+rounds+" increment=1 border=3 font=12");
 		setBatchMode("show");
 	}
 	selectWindow(AutoThreshold);
@@ -1651,10 +1707,8 @@ function ThresholdCheck() {
 		selectWindow(colorCodedStack);
 		highestQuality = 0;
 		rounds = nSlices;
-		
-		ThrNames = newArray("Default", "Huang", "Huang2", "Intermodes", "IsoData", "Li", "MaxEntropy", "Mean", "MinError", "Minimum", "Moments", "Otsu", "Percentile", "RenyiEntropy", "Shanbhag", "Triangle", "Yen", "Bernsen", "Contrast", "Mean (local)", "Median", "MidGrey", "Niblack", "Otsu (local)", "Phansalkar", "Sauvola");
-		
-		for(runs=1; runs<=rounds; runs++) {
+				
+		for(runs=1; runs < ThrNames.length; runs++) {
 			selectWindow(colorCodedStack);
 			setSlice(runs);
 			run("Duplicate...", "title=copyCodedStack");
@@ -1815,6 +1869,9 @@ function FFBackgroundCorrection() {
 	if(type1!=24) {
 		setPasteMode("Copy");
 		selectWindow(original);
+		run("32-bit");
+		selectWindow(flatField);
+		run("32-bit");
 		getRawStatistics(nPixels, mean, min, max, std, histogram);
 		run("Calculator Plus", "i1=["+original+"] i2=["+flatField+"] operation=[Divide: i2 = (i1/i2) x k1 + k2] k1=mean k2=0 create");
 		rename("FFCorr_"+original);
@@ -1825,7 +1882,7 @@ function FFBackgroundCorrection() {
 		selectWindow(original);
 		run("Duplicate...", "title=[dup_"+original+"]");
 		HSBOrig=getTitle();
-		run("HSB Stack");
+		run("HSB (32-bit)");
 		setSlice(3);
 		run("Duplicate...", "title=brightnessOrig");
 		brightnessOrig = getTitle();
@@ -1834,7 +1891,7 @@ function FFBackgroundCorrection() {
 		selectWindow(flatField);
 		run("Duplicate...", "title=[dup_"+flatField+"]");
 		HSBFF=getTitle();
-		run("HSB Stack");
+		run("HSB (32-bit)");
 		setSlice(3);
 		run("Duplicate...", "title=brightnessFF");
 		brightnessFF = getTitle();
