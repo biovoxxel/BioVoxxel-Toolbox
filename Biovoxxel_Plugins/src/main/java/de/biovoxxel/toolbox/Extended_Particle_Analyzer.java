@@ -190,7 +190,7 @@ public class Extended_Particle_Analyzer implements PlugInFilter {
 			APAdialog.addCheckboxGroup(4, 2, checkboxLabels, previousCheckboxGroup);
 			APAdialog.addHelp("http://imagej.net/BioVoxxel_Toolbox");
 			APAdialog.showDialog();
-			APAdialog.setSmartRecording(true);
+			APAdialog.setSmartRecording(false);
 			if(APAdialog.wasCanceled()) {
 				return;
 			}
