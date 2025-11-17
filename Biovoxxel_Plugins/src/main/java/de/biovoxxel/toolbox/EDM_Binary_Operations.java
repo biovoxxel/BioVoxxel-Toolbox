@@ -8,6 +8,7 @@ import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
+import ij.gui.Roi;
 import ij.plugin.filter.EDM;
 import ij.plugin.filter.ExtendedPlugInFilter;
 import ij.plugin.filter.PlugInFilterRunner;
@@ -56,6 +57,7 @@ import ij.process.ImageProcessor;
 	
 	public int setup(String arg, ImagePlus imp) {
 		this.imp = imp;
+		imp.killRoi();
 		if(!imp.getProcessor().isBinary()) {
 			IJ.error("works only on 8-bit binary images");
 			return DONE;
@@ -92,6 +94,7 @@ import ij.process.ImageProcessor;
 	}
 	
 	public void run(ImageProcessor ip) {
+						
 		Prefs.blackBackground = true;
 		boolean invertedLut = ip.isInvertedLut();
 		if(invertedLut) {
@@ -110,6 +113,7 @@ import ij.process.ImageProcessor;
 			doErosion(ip, iterationChoice, 255);
 		}
 		imp.updateAndDraw();
+		
 	}
 	
 	
