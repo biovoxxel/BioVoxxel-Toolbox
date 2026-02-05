@@ -105,7 +105,9 @@ public class Enhance_True_Color_Contrast implements ExtendedPlugInFilter, Dialog
 
 	public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
 		GenericDialog gd = new GenericDialog("True-color contrast setup");
-			gd.addNumericField("saturated pixels:", 0.0, 1, 4, "%");
+			gd.addNumericField("saturated pixels:", 0.01, 2, 4, "%");
+					gd.setInsets(0, 2, 0);
+					gd.addMessage("Keep between 0.01 - 0.1 to\navoid strong oversaturation");
 	                gd.addPreviewCheckbox(pfr);
 	                gd.addDialogListener(this);
 	                gd.showDialog();
